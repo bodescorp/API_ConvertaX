@@ -5,6 +5,6 @@ export class ViewController {
     @Get()
     @Render("index")
     home(){
-        return {}
+        return {message: "ola"}
     }
 }
