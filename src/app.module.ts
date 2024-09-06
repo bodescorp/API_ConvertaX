@@ -4,9 +4,11 @@ import { DbModule } from './db/db.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './app/users/users.module';
 import { AuthModule } from './app/auth/auth.module';
+import { InvestmentModule } from './app/investment/investment.module';
+import { TenantModule } from './tenant/tenant.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }),ViewModule, DbModule, UsersModule, AuthModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }),ViewModule, DbModule, UsersModule, AuthModule, InvestmentModule, TenantModule],
   controllers: [],
   providers: [],
 })
