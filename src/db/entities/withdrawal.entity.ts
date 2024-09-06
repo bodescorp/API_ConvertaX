@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { InvestmentEntity } from './investment.entity';
 
 @Entity({ name: 'withdrawal' })
 export class WithdrawalEntity {
@@ -22,5 +23,9 @@ export class WithdrawalEntity {
 
   @Column({ type: 'timestamptz' })
   withdrawal_date: Date;  // Data da retirada
+
+  @ManyToOne(() => InvestmentEntity, investment => investment.withdrawals)
+  @JoinColumn({ name: 'investment_id' })
+  investment: InvestmentEntity;
 
 }

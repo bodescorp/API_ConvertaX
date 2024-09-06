@@ -4,9 +4,10 @@ import { InvestmentController } from './investment.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { UserEntity } from 'src/db/entities/user.entity';
+import { WithdrawalEntity } from 'src/db/entities/withdrawal.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([InvestmentEntity,UserEntity ])],
+  imports: [TypeOrmModule.forFeature([InvestmentEntity,UserEntity,WithdrawalEntity ])],
   controllers: [InvestmentController],
   providers: [InvestmentService],
   exports:[InvestmentService]

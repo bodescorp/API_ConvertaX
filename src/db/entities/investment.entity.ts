@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { WithdrawalEntity } from './withdrawal.entity';
 
 @Entity({name:'investment'})
 export class InvestmentEntity {
@@ -20,4 +21,7 @@ export class InvestmentEntity {
 
   @Column({ type: 'varchar' })
   status: string;
+
+  @OneToMany(() => WithdrawalEntity, withdrawal => withdrawal.investment, { cascade: true })
+  withdrawals: WithdrawalEntity[];
 }
