@@ -70,18 +70,18 @@ export class InvestmentService {
 
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} investment`;
-  }
+  async findOne(id: string):Promise<CreateInvestmentDto> {
+    let foundInvestment: InvestmentEntity
 
-  update(id: number,) {
-    return `This action updates a #${id} investment`;
-  }
+    foundInvestment = await this.investmentRepository.findOne({
+      where: [{id}]
+    })
 
-  remove(id: number) {
-    return `This action removes a #${id} investment`;
+    if(!foundInvestment){
+      throw new HttpException(`investment not found`, HttpStatus.NOT_FOUND);
+    }
+    return this.mapEntityToDto(foundInvestment);
   }
-
 
   private mapEntityToDto(investmentEntity: InvestmentEntity): CreateInvestmentDto {
     return {

@@ -24,18 +24,8 @@ export class InvestmentController {
     return await this.investmentService.findAll(params);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.investmentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.investmentService.update(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.investmentService.remove(+id);
+  @Get('/:id')
+  async findOne(@Param('id') id: string):Promise<CreateInvestmentDto> {
+    return  await this.investmentService.findOne(id);
   }
 }
