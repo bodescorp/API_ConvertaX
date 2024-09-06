@@ -72,9 +72,8 @@ export class InvestmentService {
 
   async findOne(id: string):Promise<CreateInvestmentDto> {
     let foundInvestment: InvestmentEntity
-
     foundInvestment = await this.investmentRepository.findOne({
-      where: [{id}]
+      where: {id}
     })
 
     if(!foundInvestment){

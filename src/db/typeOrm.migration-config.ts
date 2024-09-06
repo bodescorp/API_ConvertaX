@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InvestmentEntity } from './entities/investment.entity';
+import { WithdrawalEntity } from './entities/withdrawal.entity';
 
 
 config();
@@ -16,7 +17,7 @@ const dataSourceOptions: DataSourceOptions = {
   username: configService.get<string>('DB_USERNAME'),
   password: configService.get<string>('DB_PASSWORD'),
   database: configService.get<string>('DB_NAME'),
-  entities: [UserEntity, InvestmentEntity],
+  entities: [UserEntity, InvestmentEntity, WithdrawalEntity],
   migrations: [__dirname + '/migrations/*.ts'],
   synchronize: false,
 };
