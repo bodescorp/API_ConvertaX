@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    const token = this.extractTokenFromHeader(request)|| this.extractTokenFromSession(request);
 
     if (!token) {
       throw new UnauthorizedException('No token provided');
@@ -40,9 +40,14 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
+  private extractTokenFromSession(request: Request): string | undefined {
+    return request.session?.user?.token;
+  }
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
 
     return type === 'Bearer' ? token : undefined;
   }
+
+  
 }

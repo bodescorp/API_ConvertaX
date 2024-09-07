@@ -50,6 +50,8 @@ Certifique-se de que você tem as seguintes ferramentas instaladas:
    ```env
    JWT_SECRET=senha
    JWT_EXPIRATION_TIME=tempo de expiração do token
+
+   SESSION_SECRET=senha_session
    DATABASE_HOST=localhost
    DATABASE_PORT=5432
    DATABASE_USERNAME=seu_usuario

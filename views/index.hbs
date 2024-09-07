@@ -1,10 +1,68 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>App</title>
-  </head>
-  <body>
-    {{ message }}
-  </body>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investimentos</title>
+</head>
+<body>
+  <header>
+    <h1>{{message}}</h1>
+  </header>
+
+  <section>
+    <form action="/view/investments" method="get">
+      <select name="status">
+        <option value="">Todos os Status</option>
+        <option value="active" {{#if (eq query.status "active")}}selected{{/if}}>Active</option>
+        <option value="closed" {{#if (eq query.status "closed")}}selected{{/if}}>Closed</option>
+      </select>
+      <button type="submit">Buscar</button>
+    </form>
+  </section>
+
+  <section>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Valor Inicial</th>
+          <th>Saldo Atual</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each investments.investments}}
+          <tr>
+            <td><a href="/view/investments/{{id}}">{{id}}</a></td>
+            <td>{{initial_amount}}</td>
+            <td>{{current_balance}}</td>
+            <td>{{status}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p>Total Items: {{investments.totalItems}}</p>
+    <p>Total Pages: {{investments.totalPages}}</p>
+
+    <div>
+      {{#if (gt investments.currentPage 1)}}
+        <a href="/view/investments?page={{subtract investments.currentPage 1}}">Anterior</a>
+      {{/if}}
+
+      {{#each investments.pageNumbers}}
+        <a href="/view/investments?page={{this}}" class="{{#if (eq this ../investments.currentPage)}}current{{/if}}">
+          {{this}}
+        </a>
+      {{/each}}
+
+      {{#if (lt investments.currentPage investments.totalPages)}}
+        <a href="/view/investments?page={{add investments.currentPage 1}}">Próximo</a>
+      {{/if}}
+    </div>
+  </section>
+</body>
 </html>

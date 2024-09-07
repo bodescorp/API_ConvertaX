@@ -9,9 +9,9 @@ import { FindAllParameters } from './dto/findParameters-investment.dto';
 import { InvestmentDetailsDto } from './dto/detail-investment.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 
-@ApiTags('investments')  // Agrupa os endpoints relacionados a "Investments" no Swagger
-@UseGuards(AuthGuard)    // Aplica o guard de autenticação
-@UseInterceptors(TenantInterceptor)  // Interceptor para multi-tenancy
+@ApiTags('investments')  
+@UseGuards(AuthGuard)    
+@UseInterceptors(TenantInterceptor)
 @Controller('investment')
 export class InvestmentController {
   constructor(private readonly investmentService: InvestmentService) {}

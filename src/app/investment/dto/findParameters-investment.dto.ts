@@ -17,7 +17,7 @@ export class FindAllParameters {
     example: 1,
   })
   @IsOptional()
-  @IsNumber()
+  // @IsNumber()
   page?: number;
 
   @ApiPropertyOptional({
@@ -25,6 +25,6 @@ export class FindAllParameters {
     example: 10,
   })
   @IsOptional()
-  @IsNumber()
+  // @IsNumber()
   limit?: number;
 }
