@@ -22,6 +22,7 @@ import { CreateAuthDto } from '../auth/dto/create-auth.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { TenantInterceptor } from 'src/tenant/middleware/tenant.interceptor';
 import { InvestmentDetailsDto } from '../investment/dto/detail-investment.dto';
+import { CreateInvestmentDto } from '../investment/dto/create-investment.dto';
 
 @Controller('view')
 export class ViewController {
@@ -49,6 +50,42 @@ export class ViewController {
             return res.redirect('/view/investments');
         } catch (error) {
             return res.redirect('/view/login?error=Invalid credentials');
+        }
+    }
+
+    @Get('investments/new')
+    @UseGuards(AuthGuard)
+    @UseInterceptors(TenantInterceptor)
+    @Render('create_investment')
+    createInvestmentPage(@Req() req: any, @Res() res: Response,) {
+        if (!req.session.user?.token) {
+
+            return res.redirect('/view/login?error=Invalid credentials');
+        }
+        return {};
+    }
+
+    @Post('investments/new')
+    @UseGuards(AuthGuard)
+    @UseInterceptors(TenantInterceptor)
+    async createInvestment(
+        @Body() createInvestmentDto: CreateInvestmentDto,
+        @Req() req: any,
+        @Res() res: Response,
+    ): Promise<void> {
+        if (!req.session.user?.token) {
+            return res.redirect('/view/login?error=Invalid credentials');
+        }
+        console.log('Received DTO:', createInvestmentDto);
+        try {
+            await this.investmentService.create(createInvestmentDto);
+            return res.redirect('/view/investments');
+        } catch (error) {
+            return res.render('create_investment', {
+                error: 'Não foi possível criar o investimento. Verifique os dados e tente novamente.',
+                initial_amount: createInvestmentDto.initial_amount,
+                creation_date: createInvestmentDto.creation_date,
+            });
         }
     }
 
@@ -85,24 +122,24 @@ export class ViewController {
     }
 
 
-  @Get('investments/:id')
-  @UseGuards(AuthGuard)
-  @UseInterceptors(TenantInterceptor)
-  @Render('details')
-  async investmentDetail(
-    @Param('id') id: string,
-    @Req() req: any,
-    @Res() res: Response,
-  ): Promise<void | { message: string; investment: InvestmentDetailsDto }> {
-    if (!req.session.user?.token) {
-      return res.redirect('/view/login?error=Invalid credentials');
+    @Get('investments/:id')
+    @UseGuards(AuthGuard)
+    @UseInterceptors(TenantInterceptor)
+    @Render('details')
+    async investmentDetail(
+        @Param('id') id: string,
+        @Req() req: any,
+        @Res() res: Response,
+    ): Promise<void | { message: string; investment: InvestmentDetailsDto }> {
+        if (!req.session.user?.token) {
+            return res.redirect('/view/login?error=Invalid credentials');
+        }
+
+        const investment = await this.investmentService.findOne(id);
+
+        return {
+            message: 'Detalhes do Investimento',
+            investment,
+        };
     }
-
-    const investment = await this.investmentService.findOne(id);
-
-    return {
-      message: 'Detalhes do Investimento',
-      investment,
-    };
-  }
 }
