@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsDateString, IsNumber } from 'class-validator';
 
 export class CreateInvestmentDto {
@@ -6,6 +7,7 @@ export class CreateInvestmentDto {
     description: 'O valor inicial do investimento',
     example: 1000,
   })
+  @Type(() => Number)
   @IsNumber({}, { message: 'O valor inicial deve ser um número.' })
   initial_amount: number;
 

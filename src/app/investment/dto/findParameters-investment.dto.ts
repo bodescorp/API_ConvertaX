@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsNumber, IsEnum } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { InvestmentStatusEnum } from './investment.enum';
+import { Type } from 'class-transformer';
 
 export class FindAllParameters {
   @ApiPropertyOptional({
@@ -17,7 +18,9 @@ export class FindAllParameters {
     example: 1,
   })
   @IsOptional()
-  // @IsNumber()
+  @Type(() => Number)
+
+  @IsNumber()
   page?: number;
 
   @ApiPropertyOptional({
@@ -25,6 +28,7 @@ export class FindAllParameters {
     example: 10,
   })
   @IsOptional()
-  // @IsNumber()
+  @Type(() => Number)
+  @IsNumber()
   limit?: number;
 }
