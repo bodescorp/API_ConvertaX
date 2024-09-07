@@ -7,6 +7,7 @@ import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { WithdrawalHelper } from './helpers/withdrawal.helper';
 import { WithdrawalDto } from './dto/withdrawal.dto';
 import { TenantService } from 'src/tenant/tenant.service';
+import { InvestmentStatusEnum } from '../investment/dto/investment.enum';
 
 @Injectable()
 export class WithdrawalService {
@@ -56,6 +57,9 @@ export class WithdrawalService {
 
     const transaction = await this.dataSource.transaction(async (manager) => {
       investment.current_balance -= createWithdrawalDto.amount;
+      if (investment.current_balance === 0) {
+        investment.status = InvestmentStatusEnum.closed;
+      }
       await manager.save(investment); 
       return await manager.save(withdrawalToSave); 
     });

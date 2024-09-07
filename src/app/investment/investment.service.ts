@@ -61,9 +61,9 @@ export class InvestmentService {
       searchParams.status = params.status as InvestmentStatusEnum;
     }
 
-    const page = params.page || 1;
-    const limit = params.limit || 10;
-    const skip = (page - 1) * limit;
+    const page = +params.page || 1;
+    const limit = +params.limit || 10;
+    const skip = +(page - 1) * limit;
 
 
     // paginação
@@ -93,9 +93,8 @@ export class InvestmentService {
       throw new HttpException(`Investment with ID ${id} not found`, HttpStatus.NOT_FOUND);
     }
 
-    const initialAmount = foundInvestment.initial_amount;
     const investmentAge = WithdrawalHelper.getInvestmentAgeInYears(foundInvestment.creation_date);
-    const expectedBalance = this.calculateExpectedAmount(initialAmount, investmentAge);
+    const expectedBalance = this.calculateExpectedAmount(foundInvestment.current_balance, investmentAge);
 
 
     return {
@@ -106,16 +105,16 @@ export class InvestmentService {
     };
   }
 
-  private calculateExpectedAmount(initialAmount: number, years: number): number {
+  private calculateExpectedAmount(current_balance: number, years: number): number {
     const annualInterestRate = 0.05; // 5% ao ano
-    const compoundedAmount = initialAmount * Math.pow(1 + annualInterestRate, years);
+    const compoundedAmount = current_balance * Math.pow(1 + annualInterestRate, years);
     return Math.round(compoundedAmount * 100) / 100; // Arredonda para 2 casas decimais
   }
   
 
   private mapEntityToDto(investmentEntity: InvestmentEntity): InvestmentDto {
     const expectedReturn = InvestmentHelper.calculateExpectedReturn(
-      investmentEntity.initial_amount,
+      investmentEntity.current_balance,
       investmentEntity.creation_date,
     );
 

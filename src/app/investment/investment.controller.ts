@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, UseInterceptors, Query } from '@nestjs/common';
 import { InvestmentService } from './investment.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { ListInvestmentsDto } from './dto/list-investment.dto';
@@ -9,9 +9,9 @@ import { FindAllParameters } from './dto/findParameters-investment.dto';
 import { InvestmentDetailsDto } from './dto/detail-investment.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 
-@ApiTags('investments')
-@UseGuards(AuthGuard)
-@UseInterceptors(TenantInterceptor)
+@ApiTags('investments')  // Agrupa os endpoints relacionados a "Investments" no Swagger
+@UseGuards(AuthGuard)    // Aplica o guard de autenticação
+@UseInterceptors(TenantInterceptor)  // Interceptor para multi-tenancy
 @Controller('investment')
 export class InvestmentController {
   constructor(private readonly investmentService: InvestmentService) {}
@@ -38,7 +38,6 @@ export class InvestmentController {
   @ApiParam({ name: 'id', description: 'ID do investimento' })
   @ApiResponse({ status: 200, description: 'Detalhes do investimento.', type: InvestmentDetailsDto })
   @ApiResponse({ status: 404, description: 'Investimento não encontrado.' })
-  
   async findOne(@Param('id') id: string): Promise<InvestmentDetailsDto> {
     return this.investmentService.findOne(id);
   }
