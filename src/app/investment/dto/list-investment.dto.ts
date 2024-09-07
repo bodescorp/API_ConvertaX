@@ -1,7 +1,7 @@
-import { CreateInvestmentDto } from './create-investment.dto'; // ajuste o caminho conforme necessário
+import { InvestmentDto } from "./investment.dto";
 
 export class ListInvestmentsDto {
-  investments: CreateInvestmentDto[];
-  totalItems: number;
-  totalPages: number;
+    investments: InvestmentDto[];
+    totalItems: number;
+    totalPages: number;
 }

@@ -1,3 +1,6 @@
+import { IsNumber } from 'class-validator';
+
 export class CreateWithdrawalDto {
-    amount: number;
+  @IsNumber()
+  amount: number;
 }

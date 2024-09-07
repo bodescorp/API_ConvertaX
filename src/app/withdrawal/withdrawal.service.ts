@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { WithdrawalHelper } from './helpers/withdrawal.helper';
+import { WithdrawalDto } from './dto/withdrawal.dto';
+import { TenantService } from 'src/tenant/tenant.service';
 
 @Injectable()
 export class WithdrawalService {
@@ -13,12 +15,14 @@ export class WithdrawalService {
     private readonly withdrawalRepository: Repository<WithdrawalEntity>,
     @InjectRepository(InvestmentEntity)
     private readonly investmentRepository: Repository<InvestmentEntity>,
-    private dataSource: DataSource,
+    private readonly dataSource: DataSource,
+    private readonly tenantService: TenantService,
+
   ) {}
 
-  async create(investmentId: string, createWithdrawalDto: CreateWithdrawalDto): Promise<WithdrawalEntity> {
+  async create(investmentId: string, createWithdrawalDto: CreateWithdrawalDto): Promise<WithdrawalDto> {
     const investment = await this.investmentRepository.findOne({
-      where: { id: investmentId },
+      where: { id: investmentId, id_owner: this.tenantService.getTenant().id },
     });
 
     if (!investment) {
@@ -35,7 +39,6 @@ export class WithdrawalService {
       );
     }
 
-    // Calcula o valor líquido após aplicar os impostos
     const { netAmount, taxRate, taxApplied } = WithdrawalHelper.calculateWithdrawalAmount(
       investment.creation_date,
       createWithdrawalDto.amount,
@@ -54,22 +57,21 @@ export class WithdrawalService {
     const transaction = await this.dataSource.transaction(async (manager) => {
       investment.current_balance -= createWithdrawalDto.amount;
       await manager.save(investment); 
-      return await manager.save(withdrawalToSave);
+      return await manager.save(withdrawalToSave); 
     });
 
     return this.mapEntityToDto(transaction);
   }
 
-  private mapEntityToDto(withdrawalEntity: WithdrawalEntity): WithdrawalEntity {
+  private mapEntityToDto(withdrawalEntity: WithdrawalEntity): WithdrawalDto {
     return {
       id: withdrawalEntity.id,
       investment_id: withdrawalEntity.investment_id,
-      amount: withdrawalEntity.amount,
-      net_amount: withdrawalEntity.net_amount,
-      tax_rate: withdrawalEntity.tax_rate,
-      tax_applied: withdrawalEntity.tax_applied,
+      amount: +withdrawalEntity.amount,
+      net_amount: +withdrawalEntity.net_amount,
+      tax_applied: +withdrawalEntity.tax_applied,
+      tax_rate: +withdrawalEntity.tax_rate,
       withdrawal_date: withdrawalEntity.withdrawal_date,
-      investment: withdrawalEntity.investment,
     };
   }
 }
