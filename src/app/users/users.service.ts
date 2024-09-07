@@ -4,25 +4,26 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/db/entities/user.entity';
 import { Repository } from 'typeorm';
 import { hashSync as bcryptHashSync } from 'bcrypt';
+import { CreateUserResponseDto } from './dto/create-user-response.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
-  ) { }
+  ) {}
 
-  async create(newUser: CreateUserDto): Promise<{ id: string; username: string }> {
+  async create(newUser: CreateUserDto): Promise<CreateUserResponseDto> {
     const userAlreadyRegistered = await this.findByUserName(newUser.username);
 
     if (userAlreadyRegistered) {
       throw new HttpException(
-        `User '${newUser.username}'already registered`,
+        `User '${newUser.username}' already registered`,
         HttpStatus.CONFLICT,
       );
     }
+    
     const dbUser = new UserEntity();
-
     dbUser.username = newUser.username;
     dbUser.passwordHash = bcryptHashSync(newUser.password, 10);
 
@@ -31,10 +32,11 @@ export class UsersService {
     return { id, username };
   }
 
-  async findByUserName(username: string): Promise<CreateUserDto | null> {
+  async findByUserName(username: string): Promise<CreateUserResponseDto | null> {
     const userFound = await this.usersRepository.findOne({
       where: { username },
     });
+
     if (!userFound) {
       return null;
     }
@@ -42,7 +44,6 @@ export class UsersService {
     return {
       id: userFound.id,
       username: userFound.username,
-      password: userFound.passwordHash,
     };
   }
 }
