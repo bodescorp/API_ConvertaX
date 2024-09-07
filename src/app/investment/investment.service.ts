@@ -106,7 +106,7 @@ export class InvestmentService {
   }
 
   private calculateExpectedAmount(current_balance: number, years: number): number {
-    const annualInterestRate = 0.05; // 5% ao ano
+    const annualInterestRate = 0.0642; // 6,42% ao ano
     const compoundedAmount = current_balance * Math.pow(1 + annualInterestRate, years);
     return Math.round(compoundedAmount * 100) / 100; // Arredonda para 2 casas decimais
   }

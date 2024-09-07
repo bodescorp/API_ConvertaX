@@ -3,7 +3,7 @@ export class InvestmentHelper {
     const today = new Date();
     
     if (creation_date > today) {
-      throw new Error("A data de criação do investimento não pode ser no futuro.");
+      throw new Error("The investment creation date cannot be in the future.");
     }
 
     const months = this.getMonthsDifference(today, creation_date);
