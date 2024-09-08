@@ -1,6 +1,7 @@
 import { IsString, IsNumber, IsDateString, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { InvestmentStatusEnum } from './investment.enum';
+import { Type } from 'class-transformer';
 
 export class InvestmentDto {
   @ApiProperty({
@@ -21,6 +22,7 @@ export class InvestmentDto {
     description: 'O valor inicial do investimento',
     example: 1000,
   })
+  @Type(() => Number)
   @IsNumber()
   initial_amount: number;
 
@@ -43,6 +45,7 @@ export class InvestmentDto {
     description: 'O saldo atual do investimento',
     example: 1050,
   })
+  @Type(() => Number)
   @IsNumber()
   current_balance: number;
 }

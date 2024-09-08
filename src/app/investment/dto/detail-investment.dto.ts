@@ -15,6 +15,7 @@ export class InvestmentDetailsDto {
     description: 'O valor inicial do investimento',
     example: 1000,
   })
+  @Type(() => Number)
   @IsNumber()
   initial_amount: number;
 
@@ -22,6 +23,7 @@ export class InvestmentDetailsDto {
     description: 'O saldo esperado do investimento',
     example: 1500.50,
   })
+  @Type(() => Number)
   @IsNumber()
   expected_balance: number;
 
@@ -29,6 +31,7 @@ export class InvestmentDetailsDto {
     description: 'O saldo atual do investimento após retiradas',
     example: 1200.75,
   })
+  @Type(() => Number)
   @IsNumber()
   current_balance: number;
 

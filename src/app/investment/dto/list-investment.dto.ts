@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber } from 'class-validator';
 import { InvestmentDto } from './investment.dto';
+import { Type } from 'class-transformer';
 
 export class ListInvestmentsDto {
   @ApiProperty({
@@ -14,6 +15,8 @@ export class ListInvestmentsDto {
     description: 'Número total de itens',
     example: 100,
   })
+  
+  @Type(() => Number)
   @IsNumber()
   totalItems: number;
 
@@ -21,6 +24,7 @@ export class ListInvestmentsDto {
     description: 'Número total de páginas',
     example: 10,
   })
+  @Type(() => Number)
   @IsNumber()
   totalPages: number;
 }

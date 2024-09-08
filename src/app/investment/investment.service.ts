@@ -34,19 +34,24 @@ export class InvestmentService {
       );
     }
 
-    if (investment.creation_date && new Date(investment.creation_date) > new Date()) {
+    const creationDate = investment.creation_date ? new Date(investment.creation_date) : new Date();
+
+    if (creationDate > new Date()) {
       throw new HttpException(
         'Creation date cannot be in the future',
         HttpStatus.BAD_REQUEST,
       );
     }
 
+    const investmentAge = WithdrawalHelper.getInvestmentAgeInYears(creationDate);
+    const currentBalance = this.calculateExpectedAmount(investment.initial_amount, investmentAge);
+
     const investmentToSave = this.investmentRepository.create({
       id_owner: this.tenantService.getTenant().id,
-      creation_date: investment.creation_date || new Date(),
+      creation_date: creationDate,
       initial_amount: investment.initial_amount,
       status: InvestmentStatusEnum.active,
-      current_balance: investment.initial_amount,
+      current_balance: currentBalance,
     });
 
     const createdInvestment = await this.investmentRepository.save(investmentToSave);
@@ -58,43 +63,41 @@ export class InvestmentService {
 
   async findAll(params: FindAllParameters): Promise<ListInvestmentsDto> {
     const { page, limit, status } = params;
-  
+
     const searchParams: FindOptionsWhere<InvestmentEntity> = {
       id_owner: this.tenantService.getTenant().id,
       ...(status && { status: status as InvestmentStatusEnum }),
     };
-  
+
     const isPaginated = page && limit;
     const skip = isPaginated ? (Number(page) - 1) * Number(limit) : undefined;
-  
+
     const cacheKey = `${this.cachePrefix}list:${page || 'all'}:${limit || 'all'}`;
     const cachedResult = await this.redisService.get(cacheKey);
-  
+
     if (cachedResult) {
       return JSON.parse(cachedResult);
     }
-  
+
     const queryOptions = {
       where: searchParams,
       ...(isPaginated && { take: Number(limit), skip }),
     };
-  
+
     const [investments, total] = await this.investmentRepository.findAndCount(queryOptions);
-  
+
     const totalPages = isPaginated ? Math.ceil(total / Number(limit)) : 1;
-  
+
     const result: ListInvestmentsDto = {
       investments: investments.map(this.mapEntityToDto.bind(this)),
       totalItems: total,
       totalPages,
     };
-  
+
     await this.redisService.set(cacheKey, JSON.stringify(result), 10);
-  
+
     return result;
   }
-  
-
 
   async findOne(id: string): Promise<InvestmentDetailsDto> {
     const cacheKey = `${this.cachePrefix}${id}`;
@@ -114,14 +117,14 @@ export class InvestmentService {
     }
 
     const investmentAge = WithdrawalHelper.getInvestmentAgeInYears(foundInvestment.creation_date);
-    const expectedBalance = this.calculateExpectedAmount(foundInvestment.current_balance, investmentAge);
+    const expected_balance = this.calculateExpectedAmount(foundInvestment.initial_amount, investmentAge);
 
     const result: InvestmentDetailsDto = {
       id: foundInvestment.id,
-      initial_amount: foundInvestment.initial_amount,
-      expected_balance: expectedBalance,
-      current_balance: foundInvestment.current_balance,
-      withdrawals: foundInvestment.withdrawals.map(withdrawal => this.mapWithdrawalToDto(withdrawal)),
+      initial_amount: +foundInvestment.initial_amount,
+      expected_balance: +expected_balance,
+      current_balance: +foundInvestment.current_balance,
+      withdrawals: foundInvestment.withdrawals.map(this.mapWithdrawalToDto.bind(this)),
     };
 
     await this.redisService.set(cacheKey, JSON.stringify(result), 10);
@@ -129,17 +132,17 @@ export class InvestmentService {
     return result;
   }
 
-
-  private calculateExpectedAmount(current_balance: number, years: number): number {
+  private calculateExpectedAmount(initial_amount: number, years: number): number {
     const annualInterestRate = 0.0642; // 6,42% ao ano
-    const compoundedAmount = current_balance * Math.pow(1 + annualInterestRate, years);
+    const compoundedAmount = initial_amount * Math.pow(1 + annualInterestRate, years);
     return Math.round(compoundedAmount * 100) / 100; // Arredonda para 2 casas decimais
   }
 
   private mapEntityToDto(investmentEntity: InvestmentEntity): InvestmentDto {
-    const expectedReturn = InvestmentHelper.calculateExpectedReturn(
-      investmentEntity.current_balance,
-      investmentEntity.creation_date,
+    const investmentAge = WithdrawalHelper.getInvestmentAgeInYears(investmentEntity.creation_date);
+    const expectedReturn = this.calculateExpectedAmount(
+      investmentEntity.initial_amount,
+      investmentAge,
     );
 
     return {

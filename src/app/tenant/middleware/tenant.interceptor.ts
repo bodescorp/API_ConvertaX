@@ -23,7 +23,7 @@ export class TenantInterceptor implements NestInterceptor {
         where: {id:user.sub},
       });
       if (!taskUser) {
-        throw new HttpException("User not a have Task",HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+        throw new HttpException("User not a have Investment",HttpStatus.NON_AUTHORITATIVE_INFORMATION);
       }
   
       this.tenetService.setTenant(taskUser);

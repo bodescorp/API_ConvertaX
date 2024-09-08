@@ -18,8 +18,7 @@ export class WithdrawalService {
     private readonly investmentRepository: Repository<InvestmentEntity>,
     private readonly dataSource: DataSource,
     private readonly tenantService: TenantService,
-
-  ) {}
+  ) { }
 
   async create(investmentId: string, createWithdrawalDto: CreateWithdrawalDto): Promise<WithdrawalDto> {
     const investment = await this.investmentRepository.findOne({
@@ -27,17 +26,11 @@ export class WithdrawalService {
     });
 
     if (!investment) {
-      throw new HttpException(
-        `Investment with id ${investmentId} not found`,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException(`Investment with id ${investmentId} not found`, HttpStatus.NOT_FOUND);
     }
 
     if (createWithdrawalDto.amount > investment.current_balance) {
-      throw new HttpException(
-        `Insufficient balance for withdrawal`,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(`Insufficient balance for withdrawal`, HttpStatus.BAD_REQUEST);
     }
 
     const { netAmount, taxRate, taxApplied } = WithdrawalHelper.calculateWithdrawalAmount(
@@ -57,11 +50,13 @@ export class WithdrawalService {
 
     const transaction = await this.dataSource.transaction(async (manager) => {
       investment.current_balance -= createWithdrawalDto.amount;
+
       if (investment.current_balance === 0) {
         investment.status = InvestmentStatusEnum.closed;
       }
-      await manager.save(investment); 
-      return await manager.save(withdrawalToSave); 
+
+      await manager.save(investment);
+      return await manager.save(withdrawalToSave);
     });
 
     return this.mapEntityToDto(transaction);
