@@ -8,7 +8,7 @@ import { InvestmentModule } from './app/investment/investment.module';
 import { TenantModule } from './app/tenant/tenant.module';
 import { WithdrawalModule } from './app/withdrawal/withdrawal.module';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
-import { SessionMiddleware } from './infrastructure/middleware/sessionMiddleware';
+import { RedisModule } from './cache-redis/cache-redis.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -20,14 +20,9 @@ import { SessionMiddleware } from './infrastructure/middleware/sessionMiddleware
     TenantModule,
     WithdrawalModule,
     InfrastructureModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(SessionMiddleware)
-      .forRoutes('*');
-  }
-}
+export class AppModule {}

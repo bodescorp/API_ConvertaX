@@ -60,7 +60,7 @@ export class ViewController {
             req.session.user = { token: responseAuthDto.token };
             return res.redirect('/view/investments');
         } catch (error) {
-            return res.redirect('/view/login?error=Invalid credentials');
+            return res.redirect('/view?error=Invalid credentials');
         }
     }
 
@@ -114,7 +114,7 @@ export class ViewController {
         if (!req.session.user?.token) {
             return res.redirect('/view/login?error=Invalid credentials');
         }
-        console.log('Received DTO:', createInvestmentDto);
+        
         try {
             await this.investmentService.create(createInvestmentDto);
             return res.redirect('/view/investments');

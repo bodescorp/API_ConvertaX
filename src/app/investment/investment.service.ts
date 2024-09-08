@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Like, Repository } from 'typeorm';
+import { Repository, FindOptionsWhere } from 'typeorm';
+import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { TenantService } from 'src/app/tenant/tenant.service';
 import { InvestmentStatusEnum } from './dto/investment.enum';
 import { FindAllParameters } from './dto/findParameters-investment.dto';
@@ -13,17 +13,20 @@ import { InvestmentDto } from './dto/investment.dto';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { InvestmentDetailsDto } from './dto/detail-investment.dto';
 import { WithdrawalDto } from '../withdrawal/dto/withdrawal.dto';
+import { RedisService } from 'src/cache-redis/redis.service';
+
 @Injectable()
 export class InvestmentService {
+  private readonly cachePrefix = 'investment:';
+
   constructor(
     @InjectRepository(InvestmentEntity)
     private readonly investmentRepository: Repository<InvestmentEntity>,
     private readonly tenantService: TenantService,
+    private readonly redisService: RedisService,
   ) { }
 
-
   async create(investment: CreateInvestmentDto): Promise<InvestmentDto> {
-
     if (investment.initial_amount <= 0) {
       throw new HttpException(
         'Initial investment value must be greater than 0',
@@ -48,42 +51,59 @@ export class InvestmentService {
 
     const createdInvestment = await this.investmentRepository.save(investmentToSave);
 
-    return this.mapEntityToDto(createdInvestment);
+    await this.redisService.set(`${this.cachePrefix}${createdInvestment.id}`, JSON.stringify(createdInvestment), 10);
 
+    return this.mapEntityToDto(createdInvestment);
   }
 
   async findAll(params: FindAllParameters): Promise<ListInvestmentsDto> {
+    const { page, limit, status } = params;
+  
     const searchParams: FindOptionsWhere<InvestmentEntity> = {
       id_owner: this.tenantService.getTenant().id,
+      ...(status && { status: status as InvestmentStatusEnum }),
     };
-
-    if (params.status) {
-      searchParams.status = params.status as InvestmentStatusEnum;
+  
+    const isPaginated = page && limit;
+    const skip = isPaginated ? (Number(page) - 1) * Number(limit) : undefined;
+  
+    const cacheKey = `${this.cachePrefix}list:${page || 'all'}:${limit || 'all'}`;
+    const cachedResult = await this.redisService.get(cacheKey);
+  
+    if (cachedResult) {
+      return JSON.parse(cachedResult);
     }
-
-    const page = +params.page || 1;
-    const limit = +params.limit || 10;
-    const skip = +(page - 1) * limit;
-
-
-    // paginação
-    const [investments, total] = await this.investmentRepository.findAndCount({
+  
+    const queryOptions = {
       where: searchParams,
-      take: limit,
-      skip: skip,
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      investments: investments.map((investment) => this.mapEntityToDto(investment)),
-      totalItems: total,
-      totalPages: totalPages,
+      ...(isPaginated && { take: Number(limit), skip }),
     };
-
+  
+    const [investments, total] = await this.investmentRepository.findAndCount(queryOptions);
+  
+    const totalPages = isPaginated ? Math.ceil(total / Number(limit)) : 1;
+  
+    const result: ListInvestmentsDto = {
+      investments: investments.map(this.mapEntityToDto.bind(this)),
+      totalItems: total,
+      totalPages,
+    };
+  
+    await this.redisService.set(cacheKey, JSON.stringify(result), 10);
+  
+    return result;
   }
+  
+
 
   async findOne(id: string): Promise<InvestmentDetailsDto> {
+    const cacheKey = `${this.cachePrefix}${id}`;
+    const cachedInvestment = await this.redisService.get(cacheKey);
+
+    if (cachedInvestment) {
+      return JSON.parse(cachedInvestment) as InvestmentDetailsDto;
+    }
+
     const foundInvestment = await this.investmentRepository.findOne({
       where: { id },
       relations: ['withdrawals'],
@@ -96,22 +116,25 @@ export class InvestmentService {
     const investmentAge = WithdrawalHelper.getInvestmentAgeInYears(foundInvestment.creation_date);
     const expectedBalance = this.calculateExpectedAmount(foundInvestment.current_balance, investmentAge);
 
-
-    return {
-      id:foundInvestment.id,
+    const result: InvestmentDetailsDto = {
+      id: foundInvestment.id,
       initial_amount: foundInvestment.initial_amount,
-      expectedBalance: expectedBalance,
+      expected_balance: expectedBalance,
       current_balance: foundInvestment.current_balance,
       withdrawals: foundInvestment.withdrawals.map(withdrawal => this.mapWithdrawalToDto(withdrawal)),
     };
+
+    await this.redisService.set(cacheKey, JSON.stringify(result), 10);
+
+    return result;
   }
+
 
   private calculateExpectedAmount(current_balance: number, years: number): number {
     const annualInterestRate = 0.0642; // 6,42% ao ano
     const compoundedAmount = current_balance * Math.pow(1 + annualInterestRate, years);
     return Math.round(compoundedAmount * 100) / 100; // Arredonda para 2 casas decimais
   }
-
 
   private mapEntityToDto(investmentEntity: InvestmentEntity): InvestmentDto {
     const expectedReturn = InvestmentHelper.calculateExpectedReturn(
@@ -140,7 +163,4 @@ export class InvestmentService {
       withdrawal_date: withdrawal.withdrawal_date,
     };
   }
-
-
-
 }

@@ -58,6 +58,9 @@ Certifique-se de que você tem as seguintes ferramentas instaladas:
    DATABASE_PASSWORD=sua_senha
    DATABASE_NAME=seu_banco_de_dados
 
+   REDIS_HOST=seu_banco_cache
+   REDIS_PORT=6379
+
    PORT=porta disponivel
    NODE_ENV=Mude para production para utilizar https
    CSP_ENABLED=true ou false

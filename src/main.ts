@@ -6,6 +6,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { config } from 'dotenv';
 import * as fs from 'fs';
+import * as session from 'express-session';
+
 
 config();
 async function bootstrap() {
@@ -46,6 +48,15 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api-docs', app, document);
+
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET ||'default_secret_key',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { secure: process.env.NODE_ENV === 'production' },
+    }),
+  );
 
   // Definir a porta e iniciar o servidor
   const port = process.env.PORT || 3000;

@@ -23,7 +23,7 @@ export class InvestmentDetailsDto {
     example: 1500.50,
   })
   @IsNumber()
-  expectedBalance: number;
+  expected_balance: number;
 
   @ApiProperty({
     description: 'O saldo atual do investimento após retiradas',
