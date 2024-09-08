@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere } from 'typeorm';
+import { Repository, FindOptionsWhere, FindManyOptions } from 'typeorm';
 import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { TenantService } from 'src/app/tenant/tenant.service';
 import { InvestmentStatusEnum } from './dto/investment.enum';
@@ -62,42 +62,45 @@ export class InvestmentService {
   }
 
   async findAll(params: FindAllParameters): Promise<ListInvestmentsDto> {
-    const { page, limit, status } = params;
-
     const searchParams: FindOptionsWhere<InvestmentEntity> = {
-      id_owner: this.tenantService.getTenant().id,
-      ...(status && { status: status as InvestmentStatusEnum }),
+        id_owner: this.tenantService.getTenant().id,
     };
 
-    const isPaginated = page && limit;
-    const skip = isPaginated ? (Number(page) - 1) * Number(limit) : undefined;
+    if (params.status) {
+        searchParams.status = params.status as InvestmentStatusEnum;
+    }
 
-    const cacheKey = `${this.cachePrefix}list:${page || 'all'}:${limit || 'all'}`;
+    const page = params.page || 1;
+    const limit = params.limit || 5;
+    const skip = (page - 1) * limit;
+
+    const cacheKey = `${this.cachePrefix}investments:list:${this.tenantService.getTenant().id}:${page}:${limit}:${params.status || 'all'}`;
     const cachedResult = await this.redisService.get(cacheKey);
 
     if (cachedResult) {
-      return JSON.parse(cachedResult);
+        return JSON.parse(cachedResult);
     }
 
-    const queryOptions = {
-      where: searchParams,
-      ...(isPaginated && { take: Number(limit), skip }),
-    };
+    // paginação
+    const [investments, total] = await this.investmentRepository.findAndCount({
+        where: searchParams,
+        take: limit,
+        skip: skip,
+    });
 
-    const [investments, total] = await this.investmentRepository.findAndCount(queryOptions);
-
-    const totalPages = isPaginated ? Math.ceil(total / Number(limit)) : 1;
+    const totalPages = Math.ceil(total / limit);
 
     const result: ListInvestmentsDto = {
-      investments: investments.map(this.mapEntityToDto.bind(this)),
-      totalItems: total,
-      totalPages,
+        investments: investments.map((investment) => this.mapEntityToDto(investment)),
+        totalItems: total,
+        totalPages: totalPages,
     };
 
-    await this.redisService.set(cacheKey, JSON.stringify(result), 10);
+    await this.redisService.set(cacheKey, JSON.stringify(result), 10); 
 
     return result;
-  }
+}
+
 
   async findOne(id: string): Promise<InvestmentDetailsDto> {
 
