@@ -9,6 +9,8 @@ import { TenantModule } from './app/tenant/tenant.module';
 import { WithdrawalModule } from './app/withdrawal/withdrawal.module';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
 import { RedisModule } from './cache-redis/cache-redis.module';
+import { APP_FILTER } from '@nestjs/core';
+import { ViewExceptionFilter } from './app/view/middleware/viewExceptionFilter';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -23,6 +25,9 @@ import { RedisModule } from './cache-redis/cache-redis.module';
     RedisModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [{
+    provide: APP_FILTER,
+    useClass: ViewExceptionFilter,
+  }],
 })
-export class AppModule {}
+export class AppModule { }

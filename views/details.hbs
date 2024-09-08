@@ -1,11 +1,22 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Detalhes do Investimento</title>
 </head>
+
 <body>
+
+  {{#if error}}
+  <div class="alert alert-danger">
+    {{error}}
+  </div>
+  {{/if}}
+
+  <h1>{{message}}</h1>
+
   <h1>Detalhes do Investimento</h1>
-  
+
   <section>
     <h2>Informações do Investimento</h2>
     <p><strong>Id:</strong> {{investment.id}}</p>
@@ -17,21 +28,21 @@
   <section>
     <h2>Histórico de Retiradas</h2>
     {{#if investment.withdrawals.length}}
-      <ul>
-        {{#each investment.withdrawals}}
-          <li>
-            <strong>ID da Retirada:</strong> {{id}} <br>
-            <strong>Valor Retirado:</strong> {{amount}} <br>
-            <strong>Data da Retirada:</strong> {{withdrawal_date}} <br>
-            <strong>Valor Líquido:</strong> {{net_amount}} <br>
-            <strong>Imposto Aplicado:</strong> {{tax_applied}} <br>
-            <strong>Taxa de Imposto:</strong> {{tax_rate}}% <br>
-          </li>
-          <hr> 
-        {{/each}}
-      </ul>
+    <ul>
+      {{#each investment.withdrawals}}
+      <li>
+        <strong>ID da Retirada:</strong> {{id}} <br>
+        <strong>Valor Retirado:</strong> {{amount}} <br>
+        <strong>Data da Retirada:</strong> {{withdrawal_date}} <br>
+        <strong>Valor Líquido:</strong> {{net_amount}} <br>
+        <strong>Imposto Aplicado:</strong> {{tax_applied}} <br>
+        <strong>Taxa de Imposto:</strong> {{tax_rate}}% <br>
+      </li>
+      <hr>
+      {{/each}}
+    </ul>
     {{else}}
-      <p>Não há retiradas registradas para este investimento.</p>
+    <p>Não há retiradas registradas para este investimento.</p>
     {{/if}}
   </section>
 
@@ -45,4 +56,5 @@
     <a href="/view/investments">Voltar para a lista de investimentos</a>
   </section>
 </body>
+
 </html>

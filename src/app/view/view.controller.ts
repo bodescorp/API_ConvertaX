@@ -12,6 +12,7 @@ import {
     UseInterceptors,
     Req,
     Param,
+    HttpException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { FindAllParameters } from '../investment/dto/findParameters-investment.dto';
@@ -68,25 +69,25 @@ export class ViewController {
     @Get('create-user')
     @Render('create_user')
     showCreateUserForm() {
-      return {};
+        return {};
     }
 
     @ApiExcludeEndpoint()
     @Post('create-user')
     async createUser(
-      @Body() createUserDto: CreateUserDto,
-      @Req() req: Request,
-      @Res() res: Response,
+        @Body() createUserDto: CreateUserDto,
+        @Req() req: Request,
+        @Res() res: Response,
     ): Promise<void> {
-      try {
-        await this.userService.create(createUserDto);
-        return res.redirect('/view/');
-      } catch (error) {
-        return res.render('create_user', {
-          error: 'Não foi possível criar o usuário. Verifique os dados e tente novamente.',
-          username: createUserDto.username,
-        });
-      }
+        try {
+            await this.userService.create(createUserDto);
+            return res.redirect('/view/');
+        } catch (error) {
+            return res.render('create_user', {
+                error: 'Não foi possível criar o usuário. Verifique os dados e tente novamente.',
+                username: createUserDto.username,
+            });
+        }
     }
 
     @ApiExcludeEndpoint()
@@ -114,7 +115,7 @@ export class ViewController {
         if (!req.session.user?.token) {
             return res.redirect('/view/login?error=Invalid credentials');
         }
-        
+
         try {
             await this.investmentService.create(createInvestmentDto);
             return res.redirect('/view/investments');
@@ -135,12 +136,7 @@ export class ViewController {
     async getInvestments(
         @Query() query: FindAllParameters,
         @Req() req: any,
-        @Res() res: Response,
-    ): Promise<void | { message: string; investments: ListInvestmentsDto & { currentPage: number, pageNumbers: number[] } }> {
-
-        if (!req.session.user?.token) {
-            return res.redirect('/view/login?error=Invalid credentials');
-        }
+    ): Promise<{ message: string; investments: ListInvestmentsDto & { currentPage: number, pageNumbers: number[] } }> {
 
         const page = +query.page || 1;
         const limit = +query.limit || 5;
@@ -158,6 +154,7 @@ export class ViewController {
             },
         };
     }
+
 
     @ApiExcludeEndpoint()
     @Get('investments/:id')
@@ -186,11 +183,11 @@ export class ViewController {
     @UseGuards(AuthGuard)
     @UseInterceptors(TenantInterceptor)
     @Render('withdrawals')
-    createWithdrawalForm(@Req() req: any,@Param('id') id: string,) {
+    createWithdrawalForm(@Req() req: any, @Param('id') id: string,) {
         if (!req.session.user?.token) {
             return { error: 'Você precisa estar autenticado para criar uma retirada.' };
         }
-        return {id};
+        return { id };
     }
 
     @ApiExcludeEndpoint()
