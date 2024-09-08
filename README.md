@@ -57,6 +57,9 @@ Certifique-se de que você tem as seguintes ferramentas instaladas:
    DATABASE_USERNAME=seu_usuario
    DATABASE_PASSWORD=sua_senha
    DATABASE_NAME=seu_banco_de_dados
+
+   PORT=porta disponivel
+   NODE_ENV=Mude para production para utilizar https
    ```
 
 4. **Execute as migrations para criar as tabelas:**
