@@ -98,6 +98,7 @@ export class InvestmentService {
 
 
     return {
+      id:foundInvestment.id,
       initial_amount: foundInvestment.initial_amount,
       expectedBalance: expectedBalance,
       current_balance: foundInvestment.current_balance,
@@ -110,7 +111,7 @@ export class InvestmentService {
     const compoundedAmount = current_balance * Math.pow(1 + annualInterestRate, years);
     return Math.round(compoundedAmount * 100) / 100; // Arredonda para 2 casas decimais
   }
-  
+
 
   private mapEntityToDto(investmentEntity: InvestmentEntity): InvestmentDto {
     const expectedReturn = InvestmentHelper.calculateExpectedReturn(
@@ -132,14 +133,14 @@ export class InvestmentService {
     return {
       id: withdrawal.id,
       investment_id: withdrawal.investment_id,
-      amount: Number(withdrawal.amount),  
+      amount: Number(withdrawal.amount),
       net_amount: Number(withdrawal.net_amount),
       tax_applied: Number(withdrawal.tax_applied),
       tax_rate: Number(withdrawal.tax_rate),
       withdrawal_date: withdrawal.withdrawal_date,
     };
   }
-  
-  
+
+
 
 }

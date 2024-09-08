@@ -1,9 +1,16 @@
-import { IsNumber, IsArray, ValidateNested } from 'class-validator';
+import { IsNumber, IsArray, ValidateNested, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { WithdrawalDto } from 'src/app/withdrawal/dto/withdrawal.dto';
 
 export class InvestmentDetailsDto {
+  @ApiProperty({
+    description: 'O ID do investimento',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @IsString()
+  id: string;
+  
   @ApiProperty({
     description: 'O valor inicial do investimento',
     example: 1000,

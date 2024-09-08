@@ -6,15 +6,14 @@
 <body>
   <h1>Detalhes do Investimento</h1>
   
-  <!-- Seção de detalhes do investimento -->
   <section>
     <h2>Informações do Investimento</h2>
+    <p><strong>Id:</strong> {{investment.id}}</p>
     <p><strong>Valor Inicial:</strong> {{investment.initial_amount}}</p>
     <p><strong>Saldo Atual:</strong> {{investment.current_balance}}</p>
     <p><strong>Saldo Esperado:</strong> {{investment.expectedBalance}}</p>
   </section>
 
-  <!-- Seção de retiradas -->
   <section>
     <h2>Histórico de Retiradas</h2>
     {{#if investment.withdrawals.length}}
@@ -28,7 +27,7 @@
             <strong>Imposto Aplicado:</strong> {{tax_applied}} <br>
             <strong>Taxa de Imposto:</strong> {{tax_rate}}% <br>
           </li>
-          <hr> <!-- Separador entre retiradas -->
+          <hr> 
         {{/each}}
       </ul>
     {{else}}
@@ -36,7 +35,12 @@
     {{/if}}
   </section>
 
-  <!-- Link para voltar à lista de investimentos -->
+  <section>
+    <a href="/view/withdrawals/{{investment.id}}">
+      <button type="button">Adicionar Nova Retirada</button>
+    </a>
+  </section>
+
   <section>
     <a href="/view/investments">Voltar para a lista de investimentos</a>
   </section>

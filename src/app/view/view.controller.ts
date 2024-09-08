@@ -23,20 +23,29 @@ import { AuthGuard } from '../auth/auth.guard';
 import { TenantInterceptor } from 'src/tenant/middleware/tenant.interceptor';
 import { InvestmentDetailsDto } from '../investment/dto/detail-investment.dto';
 import { CreateInvestmentDto } from '../investment/dto/create-investment.dto';
+import { CreateWithdrawalDto } from '../withdrawal/dto/create-withdrawal.dto';
+import { WithdrawalService } from '../withdrawal/withdrawal.service';
+import { ApiExcludeEndpoint } from '@nestjs/swagger';
+import { UsersService } from '../users/users.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Controller('view')
 export class ViewController {
     constructor(
         private readonly investmentService: InvestmentService,
         private readonly authService: AuthService,
+        private readonly withdrawalService: WithdrawalService,
+        private readonly userService: UsersService
     ) { }
 
-    @Get('login')
+    @ApiExcludeEndpoint()
+    @Get('')
     @Render('login')
     showLoginPage(@Query('error') error: string) {
         return { error };
     }
 
+    @ApiExcludeEndpoint()
     @Post('login')
     @HttpCode(HttpStatus.OK)
     async handleLogin(
@@ -53,6 +62,32 @@ export class ViewController {
         }
     }
 
+    @ApiExcludeEndpoint()
+    @Get('create-user')
+    @Render('create_user')
+    showCreateUserForm() {
+      return {};
+    }
+
+    @ApiExcludeEndpoint()
+    @Post('create-user')
+    async createUser(
+      @Body() createUserDto: CreateUserDto,
+      @Req() req: Request,
+      @Res() res: Response,
+    ): Promise<void> {
+      try {
+        await this.userService.create(createUserDto);
+        return res.redirect('/view/');
+      } catch (error) {
+        return res.render('create_user', {
+          error: 'Não foi possível criar o usuário. Verifique os dados e tente novamente.',
+          username: createUserDto.username,
+        });
+      }
+    }
+
+    @ApiExcludeEndpoint()
     @Get('investments/new')
     @UseGuards(AuthGuard)
     @UseInterceptors(TenantInterceptor)
@@ -65,6 +100,7 @@ export class ViewController {
         return {};
     }
 
+    @ApiExcludeEndpoint()
     @Post('investments/new')
     @UseGuards(AuthGuard)
     @UseInterceptors(TenantInterceptor)
@@ -89,7 +125,7 @@ export class ViewController {
         }
     }
 
-
+    @ApiExcludeEndpoint()
     @Get('investments')
     @UseGuards(AuthGuard)
     @UseInterceptors(TenantInterceptor)
@@ -121,7 +157,7 @@ export class ViewController {
         };
     }
 
-
+    @ApiExcludeEndpoint()
     @Get('investments/:id')
     @UseGuards(AuthGuard)
     @UseInterceptors(TenantInterceptor)
@@ -142,4 +178,42 @@ export class ViewController {
             investment,
         };
     }
+
+    @ApiExcludeEndpoint()
+    @Get('withdrawals/:id')
+    @UseGuards(AuthGuard)
+    @UseInterceptors(TenantInterceptor)
+    @Render('withdrawals')
+    createWithdrawalForm(@Req() req: any,@Param('id') id: string,) {
+        if (!req.session.user?.token) {
+            return { error: 'Você precisa estar autenticado para criar uma retirada.' };
+        }
+        return {id};
+    }
+
+    @ApiExcludeEndpoint()
+    @Post('withdrawals/:id')
+    @UseGuards(AuthGuard)
+    @UseInterceptors(TenantInterceptor)
+    async createWithdrawal(
+        @Body() createWithdrawalDto: CreateWithdrawalDto,
+        @Param('id') id: string,
+        @Req() req: any,
+        @Res() res: Response,
+    ) {
+        if (!req.session.user?.token) {
+            return res.redirect('/view/login?error=Invalid credentials');
+        }
+
+        try {
+            await this.withdrawalService.create(id, createWithdrawalDto);
+            return res.redirect(`/view/investments/${id}`);
+        } catch (error) {
+            return res.render(`withdrawals/${id}`, {
+                error: 'Não foi possível criar a retirada. Verifique os dados e tente novamente.',
+                ...createWithdrawalDto,
+            });
+        }
+    }
 }
+
