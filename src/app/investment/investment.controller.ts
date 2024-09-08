@@ -2,22 +2,22 @@ import { Controller, Get, Post, Body, Param, UseGuards, UseInterceptors, Query }
 import { InvestmentService } from './investment.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { ListInvestmentsDto } from './dto/list-investment.dto';
-import { InvestmentDto } from './dto/investment.dto'; 
+import { InvestmentDto } from './dto/investment.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { TenantInterceptor } from 'src/app/tenant/middleware/tenant.interceptor';
 import { FindAllParameters } from './dto/findParameters-investment.dto';
 import { InvestmentDetailsDto } from './dto/detail-investment.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
-@ApiTags('investments')  
-@UseGuards(AuthGuard)    
+@ApiTags('investments')
+@UseGuards(AuthGuard)
 @UseGuards(ThrottlerGuard)
 @UseInterceptors(TenantInterceptor)
 @Controller('investment')
 
 export class InvestmentController {
-  constructor(private readonly investmentService: InvestmentService) {}
+  constructor(private readonly investmentService: InvestmentService) { }
 
   @Post()
   @ApiOperation({ summary: 'Criar um novo investimento' })
@@ -42,6 +42,6 @@ export class InvestmentController {
   @ApiResponse({ status: 200, description: 'Detalhes do investimento.', type: InvestmentDetailsDto })
   @ApiResponse({ status: 404, description: 'Investimento não encontrado.' })
   async findOne(@Param('id') id: string): Promise<InvestmentDetailsDto> {
-    return this.investmentService.findOne(id);
+    return await this.investmentService.findOne(id);
   }
 }

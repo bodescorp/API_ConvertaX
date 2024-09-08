@@ -5,7 +5,6 @@ import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { TenantService } from 'src/app/tenant/tenant.service';
 import { InvestmentStatusEnum } from './dto/investment.enum';
 import { FindAllParameters } from './dto/findParameters-investment.dto';
-import { InvestmentHelper } from './helpers/investment.helper';
 import { ListInvestmentsDto } from './dto/list-investment.dto';
 import { WithdrawalEntity } from 'src/db/entities/withdrawal.entity';
 import { WithdrawalHelper } from '../withdrawal/helpers/withdrawal.helper';
@@ -14,6 +13,7 @@ import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { InvestmentDetailsDto } from './dto/detail-investment.dto';
 import { WithdrawalDto } from '../withdrawal/dto/withdrawal.dto';
 import { RedisService } from 'src/cache-redis/redis.service';
+import { v4 as uuidv4, validate as validateUUID } from 'uuid';
 
 @Injectable()
 export class InvestmentService {
@@ -100,6 +100,11 @@ export class InvestmentService {
   }
 
   async findOne(id: string): Promise<InvestmentDetailsDto> {
+
+    if (!validateUUID(id)) {
+      throw new HttpException('Invalid UUID format', HttpStatus.BAD_REQUEST);
+    }
+
     const cacheKey = `${this.cachePrefix}${id}`;
     const cachedInvestment = await this.redisService.get(cacheKey);
 
@@ -119,11 +124,12 @@ export class InvestmentService {
     const investmentAge = WithdrawalHelper.getInvestmentAgeInYears(foundInvestment.creation_date);
     const expected_balance = this.calculateExpectedAmount(foundInvestment.initial_amount, investmentAge);
 
+
     const result: InvestmentDetailsDto = {
       id: foundInvestment.id,
-      initial_amount: +foundInvestment.initial_amount,
-      expected_balance: +expected_balance,
-      current_balance: +foundInvestment.current_balance,
+      initial_amount: foundInvestment.initial_amount,
+      expected_balance: expected_balance,
+      current_balance: foundInvestment.current_balance,
       withdrawals: foundInvestment.withdrawals.map(this.mapWithdrawalToDto.bind(this)),
     };
 
