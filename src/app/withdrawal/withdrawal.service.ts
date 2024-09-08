@@ -6,7 +6,7 @@ import { DataSource, Repository } from 'typeorm';
 import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { WithdrawalHelper } from './helpers/withdrawal.helper';
 import { WithdrawalDto } from './dto/withdrawal.dto';
-import { TenantService } from 'src/tenant/tenant.service';
+import { TenantService } from 'src/app/tenant/tenant.service';
 import { InvestmentStatusEnum } from '../investment/dto/investment.enum';
 
 @Injectable()

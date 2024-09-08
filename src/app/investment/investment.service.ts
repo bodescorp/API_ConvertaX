@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InvestmentEntity } from 'src/db/entities/investment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Like, Repository } from 'typeorm';
-import { TenantService } from 'src/tenant/tenant.service';
+import { TenantService } from 'src/app/tenant/tenant.service';
 import { InvestmentStatusEnum } from './dto/investment.enum';
 import { FindAllParameters } from './dto/findParameters-investment.dto';
 import { InvestmentHelper } from './helpers/investment.helper';

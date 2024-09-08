@@ -4,17 +4,17 @@ import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { ListInvestmentsDto } from './dto/list-investment.dto';
 import { InvestmentDto } from './dto/investment.dto'; 
 import { AuthGuard } from '../auth/auth.guard';
-import { TenantInterceptor } from 'src/tenant/middleware/tenant.interceptor';
+import { TenantInterceptor } from 'src/app/tenant/middleware/tenant.interceptor';
 import { FindAllParameters } from './dto/findParameters-investment.dto';
 import { InvestmentDetailsDto } from './dto/detail-investment.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('investments')  
 @UseGuards(AuthGuard)    
+@UseGuards(ThrottlerGuard)
 @UseInterceptors(TenantInterceptor)
 @Controller('investment')
-@Throttle({ default: { limit: 10, ttl: 600 } })
 
 export class InvestmentController {
   constructor(private readonly investmentService: InvestmentService) {}

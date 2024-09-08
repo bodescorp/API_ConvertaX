@@ -3,15 +3,15 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { WithdrawalService } from './withdrawal.service';
 import { CreateWithdrawalDto } from './dto/create-withdrawal.dto';
 import { AuthGuard } from '../auth/auth.guard';
-import { TenantInterceptor } from 'src/tenant/middleware/tenant.interceptor';
+import { TenantInterceptor } from 'src/app/tenant/middleware/tenant.interceptor';
 import { WithdrawalDto } from './dto/withdrawal.dto';
-import { Throttle } from '@nestjs/throttler';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('withdrawals')
 @UseGuards(AuthGuard)
+@UseGuards(ThrottlerGuard)
 @UseInterceptors(TenantInterceptor)
 @Controller('withdrawal')
-@Throttle({ default: { limit: 10, ttl: 600 } })
 export class WithdrawalController {
   constructor(private readonly withdrawalService: WithdrawalService) {}
 

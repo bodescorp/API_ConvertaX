@@ -11,10 +11,15 @@ import { WithdrawalService } from '../withdrawal/withdrawal.service';
 import { WithdrawalModule } from '../withdrawal/withdrawal.module';
 import { WithdrawalEntity } from 'src/db/entities/withdrawal.entity';
 import { UsersService } from '../users/users.service';
+import { registerHbsHelpers } from './helpers/hbs-helper';
 
 @Module({
   imports: [TypeOrmModule.forFeature([InvestmentEntity,UserEntity, WithdrawalEntity]),InvestmentModule, AuthModule, WithdrawalModule, UserEntity], 
   controllers: [ViewController],
   providers: [InvestmentService,AuthService, WithdrawalService, UsersService],
 })
-export class ViewModule {}
+export class ViewModule {
+  constructor() {
+    registerHbsHelpers();
+  }
+}

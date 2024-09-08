@@ -60,6 +60,7 @@ Certifique-se de que você tem as seguintes ferramentas instaladas:
 
    PORT=porta disponivel
    NODE_ENV=Mude para production para utilizar https
+   CSP_ENABLED=true ou false
    ```
 
 4. **Execute as migrations para criar as tabelas:**

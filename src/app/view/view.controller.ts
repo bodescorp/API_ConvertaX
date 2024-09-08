@@ -20,7 +20,7 @@ import { InvestmentService } from '../investment/investment.service';
 import { AuthService } from '../auth/auth.service';
 import { CreateAuthDto } from '../auth/dto/create-auth.dto';
 import { AuthGuard } from '../auth/auth.guard';
-import { TenantInterceptor } from 'src/tenant/middleware/tenant.interceptor';
+import { TenantInterceptor } from 'src/app/tenant/middleware/tenant.interceptor';
 import { InvestmentDetailsDto } from '../investment/dto/detail-investment.dto';
 import { CreateInvestmentDto } from '../investment/dto/create-investment.dto';
 import { CreateWithdrawalDto } from '../withdrawal/dto/create-withdrawal.dto';
@@ -28,7 +28,9 @@ import { WithdrawalService } from '../withdrawal/withdrawal.service';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
+@UseGuards(ThrottlerGuard)
 @Controller('view')
 export class ViewController {
     constructor(
