@@ -7,10 +7,14 @@ import { AuthModule } from './app/auth/auth.module';
 import { InvestmentModule } from './app/investment/investment.module';
 import { TenantModule } from './tenant/tenant.module';
 import { WithdrawalModule } from './app/withdrawal/withdrawal.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }),ViewModule, DbModule, UsersModule, AuthModule, InvestmentModule, TenantModule, WithdrawalModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    ViewModule, DbModule, UsersModule, AuthModule, InvestmentModule, TenantModule, WithdrawalModule,
+    ThrottlerModule.forRoot([{ limit: 10, ttl: 600 }]),],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

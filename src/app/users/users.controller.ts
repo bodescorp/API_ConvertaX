@@ -3,9 +3,12 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserResponseDto } from './dto/create-user-response.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('users')
 @Controller('users')
+@Throttle({ default: { limit: 10, ttl: 600 } })
+
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
