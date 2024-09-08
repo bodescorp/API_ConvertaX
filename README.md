@@ -25,8 +25,8 @@ Certifique-se de que você tem as seguintes ferramentas instaladas:
 
 - Node.js (versão 14 ou superior)
 - PostgreSQL
-- Redis (opcional, para cache)
-- Docker (opcional, para containerização)
+- Redis
+- Docker
 
 ## Instalação
 
@@ -117,6 +117,11 @@ Certifique-se de que você tem as seguintes ferramentas instaladas:
       "amount": 100
     }
     ```
+
+## Links
+
+- **Visualização da Aplicação:** [http://localhost:3000/view](http://localhost:3000/view)
+- **Documentação da API:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
 ## Testes
 
