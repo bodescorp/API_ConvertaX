@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{title}}</title>
+</head>
+<body>
+  <h1>Login Page</h1>
+  
+  {{#if error}}
+    <p style="color: red;">{{error}}</p>
+  {{/if}}
+  
+  <form action="/view/login" method="post">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+    <button type="submit">Login</button>
+  </form>
+
+  <!-- Botão para ir para a página de criação de usuário -->
+  <section>
+    <a href="/view/create-user">
+      <button type="button">Criar Novo Usuário</button>
+    </a>
+  </section>
+</body>
+</html>
